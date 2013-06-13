@@ -1,5 +1,6 @@
 var App = (function () {
 
+    var client_id = '6f712c5ac1236d7729360ee6afc65292';
     var socket = io.connect('http://localhost');
 
     var $sequencerEl = $('table');
@@ -117,7 +118,21 @@ var App = (function () {
         return source;
     },
 
+    scsearch = function (term) {
+        SC.get('/tracks', { limit: 5 }, function (tracks) {
+            for (var i=0; i < tracks.length; i++) {
+                var track = tracks[i];
+                console.log(track.stream_url);
+                var $resultEl = $('<li>' + track.title + '</li>');
+                // $('#search-results').append($resultEl);
+            }
+        });
+    },
+
     initialize = function () {
+        SC.initialize({
+            client_id: '6f712c5ac1236d7729360ee6afc65292'
+        });
         getSample('kick', 0);
         getSample('snare', 1);
         getSample('hat1', 2);
@@ -165,6 +180,7 @@ var App = (function () {
         socket.emit('setState', { id: $(this).attr('id'), state: (($(this).hasClass('active')) ? 0 : 1) });
     });
 
+
     socket.on('updateState', function (data) {
         var $element = $('td#' + data.id);
         if (data.state == 0) {
@@ -172,6 +188,34 @@ var App = (function () {
         } else if (data.state == 1) {
             $element.addClass('active');
         }
+    });
+
+    $('#search').keyup(function () {
+        scsearch($(this).val());
+    });
+
+    $("#search").select2({
+        placeholder: "Search for a sample",
+        minimumInputLength: 3,
+        ajax: {
+            url: "http://api.soundcloud.com/tracks.json",
+            dataType: 'jsonp',
+            quietMillis: 100,
+            data: function (term) {
+                return {
+                    q: term,
+                    limit: 10,
+                    client_id: client_id
+                };
+            },
+            results: function (data, page) {
+                debugger;
+            }
+        },
+        formatResult: formatResult, // omitted for brevity, see the source of this page
+        formatSelection: movieFormatSelection, // omitted for brevity, see the source of this page
+        dropdownCssClass: "bigdrop", // apply css that makes the dropdown taller
+        escapeMarkup: function (m) { return m; } // we do not want to escape markup since we are displaying html in results
     });
 
     return {
@@ -182,6 +226,16 @@ var App = (function () {
 
 function onError () {
     alert('Shiiiiiiiiiiit! Its borked!');
+}
+
+function movieFormatResult(sound) {
+    var markup =    ['<ul id="search-results">',
+                    '<ul>'].join('');
+    return markup;
+}
+
+function movieFormatSelection(movie) {
+    return movie.title;
 }
 
 

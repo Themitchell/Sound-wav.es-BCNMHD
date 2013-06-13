@@ -1,15 +1,28 @@
 <html>
 <head>
   <title>Sound-wav.es</title>
+  <link rel="stylesheet" type="text/css" href="/select2/select2.css">
   <link rel="stylesheet" type="text/css" href="/stylesheets/style.css">
 </head>
 <body>
   <h1>Sound-wav.es</h1>
 
-  <input  id="tempo" type="range" min="40" max="240" step="1" value="<%= sequencer.tempo || 120 %>" />
-  <button id="metronome-toggle">Toggle Metronome</button>
-  <button id="play">Play</button>
-  <button id="stop">Stop</button>
+  <div>
+    <label name="tempo">Tempo</label>
+    <input  name="tempo" id="tempo" type="range" min="40" max="240" step="1" value="<%= sequencer.tempo || 120 %>" />
+  </div>
+
+  <div>
+    <button id="metronome-toggle">Toggle Metronome</button>
+    <button id="play">Play</button>
+    <button id="stop">Stop</button>
+  </div>
+
+  <div>
+    <label name="search">Search</label>
+    <input name="search" id="search" type="text"></input>
+  </div>
+
   <table>
     <tbody>
       <% var verticalNames = ['a', 'b', 'c', 'd'] %>
@@ -24,8 +37,10 @@
     </tbody>
   </table>
 
+  <script type="text/javascript" src="//connect.soundcloud.com/sdk.js"></script>
   <script type="text/javascript" src="/socket.io/socket.io.js"></script>
   <script type="text/javascript" src="/javascripts/jquery.js"></script>
+  <script type="text/javascript" src="/select2/select2.js"></script>
   <script type="text/javascript" src="/javascripts/main.js"></script>
 </body>
 </html>
