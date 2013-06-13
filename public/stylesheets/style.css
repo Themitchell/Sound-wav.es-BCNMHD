@@ -19,7 +19,7 @@ table tr td {
   border: 1px solid #aaa;
 }
 
-table tr td.enabled {
+table tr td.active {
   background-color: #aaa;
 }
 
@@ -27,6 +27,6 @@ table tr td.highlighted {
   background-color: #ddd;
 }
 
-table tr td.enabled.highlighted {
+table tr td.active.highlighted {
   background-color: #888;
 }

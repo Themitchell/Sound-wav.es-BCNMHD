@@ -1,9 +1,11 @@
 var App = (function () {
 
+    var socket = io.connect('http://localhost');
+
     var $sequencerEl = $('table');
     var $sequencerRows = $sequencerEl.find('tr');
 
-    var samples = [null, null, null, null, null, null, null, null];
+    var samples = [null, null, null, null];
 
     // Thanks to cwilso on github for his code which helped to inspire this apps accurate timing
     // https://github.com/cwilso/metronome/
@@ -62,18 +64,19 @@ var App = (function () {
 
     scheduleNotes = function ( beatNumber, time ) {
         var beatElements = [];
-        debugger;
-        $.each($sequencerRows, function (i, row) {
-            debugger;
-            beatElements.push($(row).find('td')[beatNumber]);
-        });
-        // if ($(step).hasClass('active')) samples[i].start(time);
+        for (var i=0; i < $sequencerRows.length; i++) {
+            var step = $($sequencerRows[i]).find('td')[beatNumber];
+            if ($(step).hasClass('active')) createSoundSource(samples[i]).start(time);
+        }
+        // for (var i=0; i < beatElements.length; i++) {
+        //     if ($(beatElements[i]).hasClass('active')) createSoundSource(samples[i]).start(time);
+        // }
     },
 
     schedule = function () {
         while (nextNoteTime < audioContext.currentTime + scheduleAheadTime ) {
             notesInQueue.push( { note: current16thNote, time: nextNoteTime } );
-            // scheduleClick( current16thNote, nextNoteTime );
+            scheduleClick( current16thNote, nextNoteTime );
             scheduleNotes( current16thNote, nextNoteTime );
             nextNote();
         }
@@ -92,6 +95,21 @@ var App = (function () {
         window.clearTimeout( timerID );
     },
 
+    getSample = function (path, sequenceRow) {
+        var sample;
+        var request = new XMLHttpRequest();
+        request.open('GET', path + '.mp3', true);
+        request.responseType = 'arraybuffer';
+
+        request.onload = function() {
+            audioContext.decodeAudioData(request.response, function (buffer) {
+                samples[sequenceRow] = buffer;
+            }, onError);
+        }
+
+        request.send();
+    },
+
     createSoundSource = function (buffer) {
         var source = audioContext.createBufferSource();
         source.buffer = buffer;
@@ -100,23 +118,10 @@ var App = (function () {
     },
 
     initialize = function () {
-        var kick;
-        var request = new XMLHttpRequest();
-        request.open('GET', 'kick.mp3', true);
-        request.responseType = 'arraybuffer';
-
-        // Decode asynchronously
-        request.onload = function() {
-            audioContext.decodeAudioData(request.response, function (buffer) {
-                kick = buffer;
-                // TODO: make this NOT be all the kicks
-                for (var i = 0; i < samples.length; i++) {
-                    samples[i] = createSoundSource(kick);
-                }
-            }, onError);
-        }
-
-        request.send();
+        getSample('kick', 0);
+        getSample('snare', 1);
+        getSample('hat1', 2);
+        getSample('hat2', 3);
 
         return {
             start:  start,
@@ -152,6 +157,19 @@ var App = (function () {
         tempo = $('#tempo').val();
     });
 
+    $('td').on('click', function () {
+        socket.emit('setState', { id: $(this).attr('id'), state: (($(this).hasClass('active')) ? 0 : 1) });
+    });
+
+    socket.on('updateState', function (data) {
+        var $element = $('td#' + data.id);
+        if (data.state == 0) {
+            $element.removeClass('active');
+        } else if (data.state == 1) {
+            $element.addClass('active');
+        }
+    });
+
     return {
         init: initialize
     };
@@ -159,8 +177,14 @@ var App = (function () {
 })();
 
 function onError () {
-    alert('shiiiiiiiiiiit!');
+    alert('Shiiiiiiiiiiit! Its borked!');
 }
 
 
 app = App.init()
+
+var socket = io.connect('http://localhost');
+socket.on('updateState', function (data) {
+
+});
+

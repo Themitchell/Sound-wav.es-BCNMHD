@@ -5,9 +5,9 @@
 
 var express = require('express')
   , routes = require('./routes')
-  , user = require('./routes/user')
   , http = require('http')
-  , path = require('path');
+  , path = require('path')
+  , socketio = require('socket.io');
 
 var app = express();
 
@@ -28,8 +28,17 @@ if ('development' == app.get('env')) {
 }
 
 app.get('/', routes.index);
-app.get('/users', user.list);
 
-http.createServer(app).listen(app.get('port'), function(){
+server = http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
+});
+
+var io = socketio.listen(server);
+
+io.sockets.on('connection', function (socket) {
+
+    socket.on('setState', function (data) {
+        io.sockets.emit('updateState', data);
+    });
+
 });
