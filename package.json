@@ -10,6 +10,5 @@
     "ejs": "*",
     "redis": "*",
     "socket.io": "*",
-    "ejs-locals": "*"
   }
 }

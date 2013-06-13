@@ -6,3 +6,27 @@ body {
 a {
   color: #00B7FF;
 }
+
+table {
+  width: 90%;
+  height: 30rem;
+  margin: 1rem auto;
+}
+
+table tr td {
+  width: 5%;
+  height: 10%;
+  border: 1px solid #aaa;
+}
+
+table tr td.enabled {
+  background-color: #aaa;
+}
+
+table tr td.highlighted {
+  background-color: #ddd;
+}
+
+table tr td.enabled.highlighted {
+  background-color: #888;
+}
