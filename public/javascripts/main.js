@@ -1,5 +1,10 @@
 var App = (function () {
 
+    var $sequencerEl = $('table');
+    var $sequencerRows = $sequencerEl.find('tr');
+
+    var samples = [null, null, null, null, null, null, null, null];
+
     // Thanks to cwilso on github for his code which helped to inspire this apps accurate timing
     // https://github.com/cwilso/metronome/
 
@@ -22,7 +27,7 @@ var App = (function () {
     sequenceLengthIn    = 16,
 
     noteResolutionIndex = ['16th', '8th', 'quarter', 'half', 'whole'],
-    noteResolution      = 0,
+    noteResolution      = 2,
 
 
     // STATUSES:
@@ -56,12 +61,19 @@ var App = (function () {
     },
 
     scheduleNotes = function ( beatNumber, time ) {
+        var beatElements = [];
+        debugger;
+        $.each($sequencerRows, function (i, row) {
+            debugger;
+            beatElements.push($(row).find('td')[beatNumber]);
+        });
+        // if ($(step).hasClass('active')) samples[i].start(time);
     },
 
     schedule = function () {
         while (nextNoteTime < audioContext.currentTime + scheduleAheadTime ) {
             notesInQueue.push( { note: current16thNote, time: nextNoteTime } );
-            scheduleClick( current16thNote, nextNoteTime );
+            // scheduleClick( current16thNote, nextNoteTime );
             scheduleNotes( current16thNote, nextNoteTime );
             nextNote();
         }
@@ -80,10 +92,38 @@ var App = (function () {
         window.clearTimeout( timerID );
     },
 
+    createSoundSource = function (buffer) {
+        var source = audioContext.createBufferSource();
+        source.buffer = buffer;
+        source.connect(audioContext.destination);
+        return source;
+    },
+
     initialize = function () {
+        var kick;
+        var request = new XMLHttpRequest();
+        request.open('GET', 'kick.mp3', true);
+        request.responseType = 'arraybuffer';
+
+        // Decode asynchronously
+        request.onload = function() {
+            audioContext.decodeAudioData(request.response, function (buffer) {
+                kick = buffer;
+                // TODO: make this NOT be all the kicks
+                for (var i = 0; i < samples.length; i++) {
+                    samples[i] = createSoundSource(kick);
+                }
+            }, onError);
+        }
+
+        request.send();
+
         return {
             start:  start,
-            stop:   stop
+            stop:   stop,
+            samples: function () {
+                return samples;
+            }
         };
     };
 
@@ -117,5 +157,10 @@ var App = (function () {
     };
 
 })();
+
+function onError () {
+    alert('shiiiiiiiiiiit!');
+}
+
 
 app = App.init()
