@@ -18,7 +18,7 @@ var App = (function () {
 
     // SETTINGS:
     // Tempo (duh!)
-    tempo               = 180.0,
+    tempo               = $('#tempo').val(),
     // Time to lookahead for scheduling notes within (Buffer size)
     lookahead           = 25.0,
     // Time ahead of playhead to schedule notes (When to buffer)
@@ -152,9 +152,13 @@ var App = (function () {
         }
     });
 
-    $('#tempo').val(tempo);
-    $('#tempo').on('change', function () {
-        tempo = $('#tempo').val();
+    $('#tempo').on('change', function (e) {
+        socket.emit('setTempo', { tempo: $('#tempo').val() });
+    });
+
+    socket.on('updateTempo', function (data) {
+        tempo = data.tempo;
+        $('#tempo').val(data.tempo);
     });
 
     $('td').on('click', function () {

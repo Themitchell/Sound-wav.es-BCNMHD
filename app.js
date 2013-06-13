@@ -9,6 +9,14 @@ var express = require('express')
   , path = require('path')
   , socketio = require('socket.io');
 
+var redis = require("redis"),
+    client = redis.createClient();
+
+client.on("error", function (err) {
+    console.log("Error " + err);
+});
+
+
 var app = express();
 
 // all environments
@@ -27,9 +35,11 @@ if ('development' == app.get('env')) {
   app.use(express.errorHandler());
 }
 
-app.get('/', routes.index);
+app.get('/', function (req, res) {
+    routes.index(req, res, client);
+});
 
-server = http.createServer(app).listen(app.get('port'), function(){
+server = http.createServer(app).listen(app.get('port'), function (){
   console.log('Express server listening on port ' + app.get('port'));
 });
 
@@ -38,7 +48,13 @@ var io = socketio.listen(server);
 io.sockets.on('connection', function (socket) {
 
     socket.on('setState', function (data) {
+        client.hset('sequencer', data.id, data.state, redis.print);
         io.sockets.emit('updateState', data);
+    });
+
+    socket.on('setTempo', function (data) {
+        client.hset('sequencer', 'tempo', data.tempo, redis.print);
+        io.sockets.emit('updateTempo', data);
     });
 
 });

@@ -9,6 +9,6 @@
     "express": "*",
     "ejs": "*",
     "redis": "*",
-    "socket.io": "*",
+    "socket.io": "*"
   }
 }
