@@ -1,7 +1,88 @@
-var App = (function () {
+    var mappings = {
+        'a0': 0,
+        'a1': 1,
+        'a2': 2,
+        'a3': 3,
+        'a4': 4,
+        'a5': 5,
+        'a6': 6,
+        'a7': 7,
+        'a8': 16,
+        'a9': 17,
+        'a10': 18,
+        'a11': 19,
+        'a12': 20,
+        'a13': 21,
+        'a14': 22,
+        'a15': 23,
+        'b0': 32,
+        'b1': 33,
+        'b2': 34,
+        'b3': 35,
+        'b4': 36,
+        'b5': 37,
+        'b6': 38,
+        'b7': 39,
+        'b8': 48,
+        'b9': 49,
+        'b10': 50,
+        'b11': 51,
+        'b12': 52,
+        'b13': 53,
+        'b14': 54,
+        'b15': 55,
+        'c0': 64,
+        'c1': 65,
+        'c2': 66,
+        'c3': 67,
+        'c4': 68,
+        'c5': 69,
+        'c6': 70,
+        'c7': 71,
+        'c8': 80,
+        'c9': 81,
+        'c10': 82,
+        'c11': 83,
+        'c12': 84,
+        'c13': 85,
+        'c14': 86,
+        'c15': 87,
+        'd0': 96,
+        'd1': 97,
+        'd2': 98,
+        'd3': 99,
+        'd4': 100,
+        'd5': 101,
+        'd6': 102,
+        'd7': 103,
+        'd8': 112,
+        'd9': 113,
+        'd10': 114,
+        'd11': 115,
+        'd12': 116,
+        'd13': 117,
+        'd14': 118,
+        'd15': 119
+    };
 
+var invert = function (obj) {
+
+  var new_obj = {};
+
+  for (var prop in obj) {
+    if(obj.hasOwnProperty(prop)) {
+      new_obj[obj[prop]] = prop;
+    }
+  }
+
+  return new_obj;
+};
+
+var App = (function () {
     var client_id = '6f712c5ac1236d7729360ee6afc65292';
     var socket = io.connect('http://localhost');
+    var Jazz = document.getElementById("Jazz1");
+    if(!Jazz || !Jazz.isJazz) Jazz = document.getElementById("Jazz2");
 
     var $sequencerEl = $('table');
     var $sequencerRows = $sequencerEl.find('tr');
@@ -84,7 +165,6 @@ var App = (function () {
     },
 
     start = function () {
-        debugger;
         isScheduling = true;
         current16thNote = 0;
         nextNoteTime = audioContext.currentTime;
@@ -128,10 +208,30 @@ var App = (function () {
         });
     },
 
+    parseMidi = function (t,a,b,c){
+        console.log(t, a, b, c);
+
+        var el_id = invert(mappings)[b];
+        var element = $('#' + el_id);
+        if (c == 127) {
+            socket.emit('setState', { id: element.attr('id'), state: ((element.hasClass('active')) ? 0 : 1) });
+        }
+        // var note = ['a', 'b', 'c', 'd'];
+        // if ((b >= 0) || (b <= 15)) {
+        //     var element = $('#a'+b);
+        //     if (c == 127) {
+        //         socket.emit('setState', { id: element.attr('id'), state: ((element.hasClass('active')) ? 0 : 1) });
+        //     }
+        // }
+    },
+
     initialize = function () {
         SC.initialize({
             client_id: '6f712c5ac1236d7729360ee6afc65292'
         });
+
+        Jazz.MidiInOpen('Launchpad S', parseMidi);
+        Jazz.MidiOutOpen('Launchpad S');
 
         return {
             start:  start,
@@ -177,6 +277,7 @@ var App = (function () {
 
 
     socket.on('updateState', function (data) {
+        Jazz.MidiOut(0x90, mappings[data.id], ((data.state == 0) ? 0 : 127)  );
         var $element = $('td#' + data.id);
         if (data.state == 0) {
             $element.removeClass('active');
