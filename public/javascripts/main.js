@@ -67,11 +67,10 @@ var App = (function () {
         var beatElements = [];
         for (var i=0; i < $sequencerRows.length; i++) {
             var step = $($sequencerRows[i]).find('td')[beatNumber];
-            if ($(step).hasClass('active')) createSoundSource(samples[i]).start(time);
+            if ($(step).hasClass('active') && (samples[i] != null || undefined)) {
+                createSoundSource(samples[i]).start(time);
+            }
         }
-        // for (var i=0; i < beatElements.length; i++) {
-        //     if ($(beatElements[i]).hasClass('active')) createSoundSource(samples[i]).start(time);
-        // }
     },
 
     schedule = function () {
@@ -85,6 +84,7 @@ var App = (function () {
     },
 
     start = function () {
+        debugger;
         isScheduling = true;
         current16thNote = 0;
         nextNoteTime = audioContext.currentTime;
@@ -99,9 +99,8 @@ var App = (function () {
     getSample = function (path, sequenceRow) {
         var sample;
         var request = new XMLHttpRequest();
-        request.open('GET', path + '.mp3', true);
+        request.open('GET', path + '?client_id=' + client_id, true);
         request.responseType = 'arraybuffer';
-
         request.onload = function() {
             audioContext.decodeAudioData(request.response, function (buffer) {
                 samples[sequenceRow] = buffer;
@@ -133,10 +132,6 @@ var App = (function () {
         SC.initialize({
             client_id: '6f712c5ac1236d7729360ee6afc65292'
         });
-        getSample('kick', 0);
-        getSample('snare', 1);
-        getSample('hat1', 2);
-        getSample('hat2', 3);
 
         return {
             start:  start,
@@ -205,17 +200,28 @@ var App = (function () {
                 return {
                     q: term,
                     limit: 10,
+                    duration: {
+                        to: 5000
+                    },
                     client_id: client_id
                 };
             },
             results: function (data, page) {
-                debugger;
+                return { results: data }
             }
         },
         formatResult: formatResult, // omitted for brevity, see the source of this page
-        formatSelection: movieFormatSelection, // omitted for brevity, see the source of this page
+        formatSelection: formatSelection, // omitted for brevity, see the source of this page
         dropdownCssClass: "bigdrop", // apply css that makes the dropdown taller
         escapeMarkup: function (m) { return m; } // we do not want to escape markup since we are displaying html in results
+    });
+
+    $("#selected-track").select2();
+
+    $('#add-to-track').on('click', function () {
+        $selectedSoundEl = $('#s2id_search .search-result');
+        $selectedTrackEl = $('#selected-track');
+        getSample(JSON.parse($selectedSoundEl.attr('data-object')).stream_url, $selectedTrackEl.val());
     });
 
     return {
@@ -228,21 +234,18 @@ function onError () {
     alert('Shiiiiiiiiiiit! Its borked!');
 }
 
-function movieFormatResult(sound) {
-    var markup =    ['<ul id="search-results">',
-                    '<ul>'].join('');
-    return markup;
+function formatResult(sound) {
+    var json = JSON.stringify(sound);
+    var markup =    $(['<span class="search-result">',
+                    sound.title,
+                    '</span>'].join(''));
+    markup.attr('data-object', json);
+    return markup[0];
 }
 
-function movieFormatSelection(movie) {
-    return movie.title;
+function formatSelection(sound) {
+    return formatResult(sound);
 }
-
 
 app = App.init()
-
-var socket = io.connect('http://localhost');
-socket.on('updateState', function (data) {
-
-});
 

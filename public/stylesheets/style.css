@@ -7,26 +7,34 @@ a {
   color: #00B7FF;
 }
 
-table {
+#sequencer {
   width: 90%;
   height: 30rem;
   margin: 1rem auto;
 }
 
-table tr td {
+#sequencer tr td {
   width: 5%;
   height: 10%;
   border: 1px solid #aaa;
 }
 
-table tr td.active {
+#sequencer tr td.active {
   background-color: #aaa;
 }
 
-table tr td.highlighted {
+#sequencer tr td.highlighted {
   background-color: #ddd;
 }
 
-table tr td.active.highlighted {
+#sequencer tr td.active.highlighted {
   background-color: #888;
+}
+
+#search {
+  width: 300px;
+}
+
+#selected-track {
+  width: 50px;
 }
