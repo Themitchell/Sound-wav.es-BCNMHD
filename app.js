@@ -13,6 +13,10 @@ var redis = require("redis");
 
 if (this.env == ('production' || 'staging')) {
     var client = require("redis-url").connect(process.env.REDISTOGO_URL);
+    io.configure(function () {
+        io.set("transports", ["xhr-polling"]);
+        io.set("polling duration", 10);
+    });
 } else {
     var client = redis.createClient();
 }
