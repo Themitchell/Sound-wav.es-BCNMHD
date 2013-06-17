@@ -11,19 +11,6 @@ var express = require('express')
 
 var redis = require("redis");
 
-if (('production' || 'staging') == app.get('env')) {
-    var rtg   = require("url").parse(process.env.REDISTOGO_URL);
-    var redis = redis.createClient(rtg.port, rtg.hostname);
-    redis.auth(rtg.auth.split(":")[1]);
-
-    io.configure(function () {
-        io.set("transports", ["xhr-polling"]);
-        io.set("polling duration", 10);
-    });
-} else {
-    var client = redis.createClient();
-}
-
 client.on("error", function (err) {
     console.log("Error " + err);
 });
@@ -42,8 +29,21 @@ app.use(express.methodOverride());
 app.use(app.router);
 app.use(express.static(path.join(__dirname, 'public')));
 
+if (('production' || 'staging') == app.get('env')) {
+    var rtg   = require("url").parse(process.env.REDISTOGO_URL);
+    var redis = redis.createClient(rtg.port, rtg.hostname);
+    redis.auth(rtg.auth.split(":")[1]);
+
+    io.configure(function () {
+        io.set("transports", ["xhr-polling"]);
+        io.set("polling duration", 10);
+    });
+} else {
+    var client = redis.createClient();
+}
+
 if ('development' == app.get('env')) {
-  app.use(express.errorHandler());
+    app.use(express.errorHandler());
 }
 
 app.get('/', function (req, res) {
