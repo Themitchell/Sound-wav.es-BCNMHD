@@ -9,8 +9,13 @@ var express = require('express')
   , path = require('path')
   , socketio = require('socket.io');
 
-var redis = require("redis"),
-    client = redis.createClient();
+var redis = require("redis");
+
+if (this.env == ('production' || 'staging')) {
+    var client = require("redis-url").connect(process.env.REDISTOGO_URL);
+} else {
+    var client = redis.createClient();
+}
 
 client.on("error", function (err) {
     console.log("Error " + err);
@@ -30,7 +35,6 @@ app.use(express.methodOverride());
 app.use(app.router);
 app.use(express.static(path.join(__dirname, 'public')));
 
-// development only
 if ('development' == app.get('env')) {
   app.use(express.errorHandler());
 }
