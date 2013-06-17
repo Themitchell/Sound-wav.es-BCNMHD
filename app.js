@@ -11,7 +11,7 @@ var express = require('express')
 
 var redis = require("redis");
 
-if (this.env == ('production' || 'staging')) {
+if (('production' || 'staging') == app.get('env')) {
     var client = require("redis-url").connect(process.env.REDISTOGO_URL);
     io.configure(function () {
         io.set("transports", ["xhr-polling"]);
