@@ -12,7 +12,10 @@ var express = require('express')
 var redis = require("redis");
 
 if (('production' || 'staging') == app.get('env')) {
-    var client = require("redis-url").connect(process.env.REDISTOGO_URL);
+    var rtg   = require("url").parse(process.env.REDISTOGO_URL);
+    var redis = redis.createClient(rtg.port, rtg.hostname);
+    redis.auth(rtg.auth.split(":")[1]);
+
     io.configure(function () {
         io.set("transports", ["xhr-polling"]);
         io.set("polling duration", 10);
