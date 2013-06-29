@@ -26,9 +26,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 if (('production' || 'staging') == app.get('env')) {
     console.log("Initialising Redis To Go")
-    var rtg   = require("url").parse(process.env.REDISTOGO_URL);
-    var client = redis.createClient(rtg.port, rtg.hostname);
-    redis.auth(rtg.auth.split(":")[1]);
+    var redis   = require("redis-url").connect(process.env.REDISTOGO_URL);
 
     io.configure(function () {
         io.set("transports", ["xhr-polling"]);
