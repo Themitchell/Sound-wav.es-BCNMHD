@@ -9,7 +9,7 @@
 
   <div>
     <label name="tempo">Tempo</label>
-    <input  name="tempo" id="tempo" type="range" min="40" max="240" step="1" value="<%= sequencer.tempo || 120 %>" />
+    <input  name="tempo" id="tempo" type="range" min="40" max="240" step="1" value="<%= (sequencer.tempo) ? sequencer.tempo : 120 %>" />
   </div>
 
   <div>
