@@ -84,6 +84,8 @@ var App = (function () {
     var Jazz = document.getElementById("Jazz1");
     if(!Jazz || !Jazz.isJazz) Jazz = document.getElementById("Jazz2");
 
+    var jazzEnabled = Jazz.isJazz
+
     var $sequencerEl = $('table');
     var $sequencerRows = $sequencerEl.find('tr');
 
@@ -230,8 +232,10 @@ var App = (function () {
             client_id: '6f712c5ac1236d7729360ee6afc65292'
         });
 
-        Jazz.MidiInOpen('Launchpad S', parseMidi);
-        Jazz.MidiOutOpen('Launchpad S');
+        if (jazzEnabled) {
+            Jazz.MidiInOpen('Launchpad S', parseMidi);
+            Jazz.MidiOutOpen('Launchpad S');
+        }
 
         return {
             start:  start,
@@ -277,7 +281,9 @@ var App = (function () {
 
 
     socket.on('updateState', function (data) {
-        Jazz.MidiOut(0x90, mappings[data.id], ((data.state == 0) ? 0 : 127)  );
+        if (jazzEnabled) {
+            Jazz.MidiOut(0x90, mappings[data.id], ((data.state == 0) ? 0 : 127)  );
+        }
         var $element = $('td#' + data.id);
         if (data.state == 0) {
             $element.removeClass('active');
