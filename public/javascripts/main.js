@@ -80,7 +80,7 @@ var invert = function (obj) {
 
 var App = (function () {
     var client_id = '6f712c5ac1236d7729360ee6afc65292';
-    var socket = io.connect('http://themitchell.local');
+    var socket = io.connect(window.location.origin);
     var Jazz = document.getElementById("Jazz1");
     if(!Jazz || !Jazz.isJazz) Jazz = document.getElementById("Jazz2");
 
