@@ -23,29 +23,6 @@ app.use(express.methodOverride());
 app.use(app.router);
 app.use(express.static(path.join(__dirname, 'public')));
 
-
-if (('production' || 'staging') == app.get('env')) {
-    console.log("Initialising Redis To Go")
-    var redis   = require("redis-url").connect(process.env.REDISTOGO_URL);
-
-    io.configure(function () {
-        io.set("transports", ["xhr-polling"]);
-        io.set("polling duration", 10);
-    });
-} else {
-    console.log("Initialising Redis")
-    var client = redis.createClient();
-}
-
-client.on("error", function (err) {
-    console.log("Error " + err);
-});
-
-
-if ('development' == app.get('env')) {
-    app.use(express.errorHandler());
-}
-
 app.get('/', function (req, res) {
     routes.index(req, res, client);
 });
@@ -55,6 +32,24 @@ server = http.createServer(app).listen(app.get('port'), function (){
 });
 
 var io = socketio.listen(server);
+
+if (('production' || 'staging') == app.get('env')) {
+    console.log("Initialising Redis To Go")
+    var client = require("redis-url").connect(process.env.REDISTOGO_URL);
+
+    io.configure(function () {
+        io.set("transports", ["xhr-polling"]);
+        io.set("polling duration", 10);
+    });
+} else {
+    console.log("Initialising Redis")
+    var client = redis.createClient();
+    app.use(express.errorHandler());
+}
+
+client.on("error", function (err) {
+    console.log("Error " + err);
+});
 
 io.sockets.on('connection', function (socket) {
 
