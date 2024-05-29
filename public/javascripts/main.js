@@ -79,7 +79,7 @@ var invert = function (obj) {
 };
 
 var App = (function () {
-    var client_id = '6f712c5ac1236d7729360ee6afc65292';
+    var soundcloud_client_id = '6f712c5ac1236d7729360ee6afc65292';
     var socket = io.connect(window.location.origin);
     var Jazz = document.getElementById("Jazz1");
     if(!Jazz || !Jazz.isJazz) Jazz = document.getElementById("Jazz2");
@@ -94,7 +94,7 @@ var App = (function () {
     // Thanks to cwilso on github for his code which helped to inspire this apps accurate timing
     // https://github.com/cwilso/metronome/
 
-    var audioContext    = new webkitAudioContext(),
+    var audioContext    = new AudioContext(),
     metronomeState      = 0,
 
     isScheduling        = false,
@@ -181,7 +181,7 @@ var App = (function () {
     getSample = function (path, sequenceRow) {
         var sample;
         var request = new XMLHttpRequest();
-        request.open('GET', path + '?client_id=' + client_id, true);
+        request.open('GET', path + '?client_id=' + soundcloud_client_id, true);
         request.responseType = 'arraybuffer';
         request.onload = function() {
             audioContext.decodeAudioData(request.response, function (buffer) {
@@ -229,7 +229,7 @@ var App = (function () {
 
     initialize = function () {
         SC.initialize({
-            client_id: '6f712c5ac1236d7729360ee6afc65292'
+            client_id: soundcloud_client_id
         });
 
         if (jazzEnabled) {

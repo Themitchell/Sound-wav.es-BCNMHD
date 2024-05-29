@@ -1,0 +1,25 @@
+version: '3'
+
+services:
+  app:
+    build:
+      context: .
+      args:
+        UID: "${UID}"
+    user: "${UID}:${UID}"
+    ports:
+      - '3000:3000'
+    volumes:
+      - .:/home/app/app
+      - soundwaves_bcnmhd_node_modules:/home/app/app/node_modules
+
+  redis:
+    image: redis
+    restart: always
+    ports:
+      - '6379:6379'
+    command: redis-server --save 60 1 --loglevel warning
+
+volumes:
+  soundwaves_bcnmhd_node_modules:
+

@@ -1,11 +1,11 @@
-
-/*
- * GET home page.
- */
-
-exports.index = function(req, res, client){
-    client.hgetall('sequencer', function (err, replies) {
-        var response = (replies == null || undefined) ? {} : replies;
-        res.render('index', { sequencer: response });
-    });
+export const index = (req, res, redis_client) => {
+    redis_client.hGetAll('sequencer')
+        .then(replies => {
+            var response = (replies == null || undefined) ? {} : replies;
+            res.render('index', { sequencer: response });
+        });
 };
+
+export default {
+    index: index
+}
