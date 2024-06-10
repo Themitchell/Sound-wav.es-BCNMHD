@@ -9,7 +9,8 @@ import bodyParser from 'body-parser'
 import methodOverride from 'method-override'
 import morgan from 'morgan'
 import errorHandler from 'errorhandler'
-import { fileURLToPath } from 'url';
+import { fileURLToPath } from 'url'
+import cors from "cors"
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -24,6 +25,7 @@ app.use(morgan('dev'));
 app.use(bodyParser());
 app.use(methodOverride());
 app.use(serveStatic(path.join(__dirname, 'public')));
+app.use(cors());
 
 app.get('/', function (req, res) {
     routes.index(req, res, redis_client);
@@ -31,16 +33,17 @@ app.get('/', function (req, res) {
 
 const server = http.createServer(app)
 
-var io = new SocketioServer(server);
+var io = new SocketioServer(server, {
+  cors: {
+    origin: "*"
+  }
+});
 
-if (('production' || 'staging') == app.get('env')) {
-    io.configure(function () {
-        io.set("transports", ["xhr-polling"]);
-        io.set("polling duration", 10);
-    });
-} else {
-    app.use(errorHandler());
-}
+io.on('connection', async (socket) => {
+  console.log('a user connected');
+});
+
+app.use(errorHandler());
 
 console.log("Initialising Redis")
 const redis_client = await redis

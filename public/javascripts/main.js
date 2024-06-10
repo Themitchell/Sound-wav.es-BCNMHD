@@ -80,7 +80,7 @@ var invert = function (obj) {
 
 var App = (function () {
     var soundcloud_client_id = '6f712c5ac1236d7729360ee6afc65292';
-    var socket = io.connect(window.location.origin);
+    var socket = io();
     var Jazz = document.getElementById("Jazz1");
     if(!Jazz || !Jazz.isJazz) Jazz = document.getElementById("Jazz2");
 
@@ -150,10 +150,11 @@ var App = (function () {
         var beatElements = [];
         for (var i=0; i < $sequencerRows.length; i++) {
             var step = $($sequencerRows[i]).find('td')[beatNumber];
-            if ($(step).hasClass('active') && (samples[i] != null || undefined)) {
-                createSoundSource(samples[i]).start(time);
-            }
+            if ($(step).hasClass('active')) createSoundSource(samples[i]).start(time);
         }
+        // for (var i=0; i < beatElements.length; i++) {
+        //     if ($(beatElements[i]).hasClass('active')) createSoundSource(samples[i]).start(time);
+        // }
     },
 
     schedule = function () {
@@ -181,7 +182,7 @@ var App = (function () {
     getSample = function (path, sequenceRow) {
         var sample;
         var request = new XMLHttpRequest();
-        request.open('GET', path + '?client_id=' + soundcloud_client_id, true);
+        request.open('GET', path + '.mp3', true);
         request.responseType = 'arraybuffer';
         request.onload = function() {
             audioContext.decodeAudioData(request.response, function (buffer) {
@@ -228,9 +229,13 @@ var App = (function () {
     },
 
     initialize = function () {
-        SC.initialize({
-            client_id: soundcloud_client_id
-        });
+        // SC.initialize({
+        //     client_id: soundcloud_client_id
+        // });
+        getSample('kick', 0);
+        getSample('snare', 1);
+        getSample('hat1', 2);
+        getSample('hat2', 3);
 
         if (jazzEnabled) {
             Jazz.MidiInOpen('Launchpad S', parseMidi);
@@ -245,6 +250,10 @@ var App = (function () {
             }
         };
     };
+
+    socket.on("connect", () => {
+        console.log('connected')
+    })
 
     $('#metronome-toggle').on('click', function () {
         if (metronomeState == 0) {
@@ -292,44 +301,33 @@ var App = (function () {
         }
     });
 
-    $('#search').keyup(function () {
-        scsearch($(this).val());
-    });
+    // $('#search').keyup(function () {
+    //     scsearch($(this).val());
+    // });
 
-    $("#search").select2({
-        placeholder: "Search for a sample",
-        minimumInputLength: 3,
-        ajax: {
-            url: "http://api.soundcloud.com/tracks.json",
-            dataType: 'jsonp',
-            quietMillis: 100,
-            data: function (term) {
-                return {
-                    q: term,
-                    limit: 10,
-                    duration: {
-                        to: 5000
-                    },
-                    client_id: client_id
-                };
-            },
-            results: function (data, page) {
-                return { results: data }
-            }
-        },
-        formatResult: formatResult, // omitted for brevity, see the source of this page
-        formatSelection: formatSelection, // omitted for brevity, see the source of this page
-        dropdownCssClass: "bigdrop", // apply css that makes the dropdown taller
-        escapeMarkup: function (m) { return m; } // we do not want to escape markup since we are displaying html in results
-    });
-
-    $("#selected-track").select2();
-
-    $('#add-to-track').on('click', function () {
-        $selectedSoundEl = $('#s2id_search .search-result');
-        $selectedTrackEl = $('#selected-track');
-        getSample(JSON.parse($selectedSoundEl.attr('data-object')).stream_url, $selectedTrackEl.val());
-    });
+    // $("#search").select2({
+    //     placeholder: "Search for a sample",
+    //     minimumInputLength: 3,
+    //     ajax: {
+    //         url: "http://api.soundcloud.com/tracks.json",
+    //         dataType: 'jsonp',
+    //         quietMillis: 100,
+    //         data: function (term) {
+    //             return {
+    //                 q: term,
+    //                 limit: 10,
+    //                 client_id: client_id
+    //             };
+    //         },
+    //         results: function (data, page) {
+    //             debugger;
+    //         }
+    //     },
+    //     formatResult: formatResult, // omitted for brevity, see the source of this page
+    //     formatSelection: movieFormatSelection, // omitted for brevity, see the source of this page
+    //     dropdownCssClass: "bigdrop", // apply css that makes the dropdown taller
+    //     escapeMarkup: function (m) { return m; } // we do not want to escape markup since we are displaying html in results
+    // });
 
     return {
         init: initialize
@@ -341,18 +339,21 @@ function onError () {
     alert('Shiiiiiiiiiiit! Its borked!');
 }
 
-function formatResult(sound) {
-    var json = JSON.stringify(sound);
-    var markup =    $(['<span class="search-result">',
-                    sound.title,
-                    '</span>'].join(''));
-    markup.attr('data-object', json);
-    return markup[0];
+function movieFormatResult(sound) {
+    var markup =    ['<ul id="search-results">',
+                    '<ul>'].join('');
+    return markup;
 }
 
-function formatSelection(sound) {
-    return formatResult(sound);
+function movieFormatSelection(movie) {
+    return movie.title;
 }
+
 
 app = App.init()
+
+// var socket = io.connect('http://localhost');
+// socket.on('updateState', function (data) {
+
+// });
 
