@@ -8,7 +8,7 @@ services:
         UID: "${UID}"
     user: "${UID}:${UID}"
     ports:
-      - '3000:3000'
+      - '80:3000'
     volumes:
       - .:/home/app/app
       - soundwaves_bcnmhd_node_modules:/home/app/app/node_modules
