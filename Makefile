@@ -15,7 +15,7 @@ UID=$(shell id -u)
 COMPANY_NAME=soundwaves
 APP_NAME=bcnmhd
 CONTAINER_NAME=${COMPANY_NAME}-${APP_NAME}-${ENV}
-DOCKER_COMPOSE_CMD=env ENV=${ENV} UID=$(UID) docker-compose -p ${CONTAINER_NAME}
+DOCKER_COMPOSE_CMD=env ENV=${ENV} UID=$(UID) docker compose -p ${CONTAINER_NAME}
 
 run:
 	$(DOCKER_COMPOSE_CMD) up
